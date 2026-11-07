@@ -18,4 +18,5 @@ dotnet build RestblCalculator.slnx -c Release
 AGPL-3.0-or-later. See [license.md](license.md).
 
 ## Credits
-LordBubblesDev - [restbl](https://github.com/LordBubblesDev/restbl) - Totk configuration
+LordBubblesDev - [restbl](https://github.com/LordBubblesDev/restbl) - TotK Reverse Engineering, TotK Configurations
+dt-12345 - TotK Reverse Engineering
