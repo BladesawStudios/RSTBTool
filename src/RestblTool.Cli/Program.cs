@@ -1,10 +1,11 @@
 using RestblTool.Core;
 
 const string Usage = """
-    usage: restbl <mod> [--game id] [--version 1.4.3] [--dry-run]
+    usage: restbl <mod or folder of mods> [--game id] [--version 1.4.3] [--dry-run]
            restbl import <game id> <version> <folder[|prefix]>... [--out data folder]
-      games: totk, oot, botw-switch, botw-wiiu. The game is worked out from the mod when it can be, and the version defaults
-      to the one the mod already has a RESTBL for, else the latest. Import folders overlay in order, oldest version first.
+      games: totk, oot, botw-switch, botw-wiiu. Every mod in a folder gets its own table. The game is worked out from the mods
+      when it can be, and the version defaults to the one a mod already has a RESTBL for, else the latest. Import folders overlay
+      in order, oldest version first.
     """;
 
 List<string> rest = [.. args];
@@ -32,33 +33,60 @@ try
 
     Game game = FindGame(gameId, null);
     RestblGenerator generator = new(game);
-    int target = version ?? generator.DefaultVersion(game.FindRoots(rest[0]).Main);
-    if (!generator.Versions.Contains(target))
+    if (version is { } wanted && !generator.Versions.Contains(wanted))
     {
-        Console.Error.WriteLine($"No vanilla RESTBL for {game.Name} {RestblGenerator.VersionName(target)}. Known: "
+        Console.Error.WriteLine($"No vanilla RESTBL for {game.Name} {RestblGenerator.VersionName(wanted)}. Known: "
                                 + string.Join(", ", generator.Versions.Reverse().Select(RestblGenerator.VersionName)));
         return 1;
     }
 
-    RestblResult result = generator.Generate(rest[0], target, write: !dryRun);
+    IReadOnlyList<string> mods = game.FindMods(rest[0]);
+    if (mods.Count == 1)
+    {
+        RestblResult result = generator.Generate(mods[0], version ?? generator.DefaultVersion(game.FindRoots(mods[0]).Main), write: !dryRun);
 
-    foreach (RestblEntry e in result.Entries)
-        Console.WriteLine($"{(e.Removed ? "-" : e.Added ? "+" : e.Grown ? "^" : "=")} {e.Name}  {e.Vanilla?.ToString() ?? "-"} -> {(e.Removed ? "-" : e.Size)}");
-    foreach (string warning in result.Warnings) Console.Error.WriteLine($"warning: {warning}");
+        foreach (RestblEntry e in result.Entries)
+            Console.WriteLine($"{(e.Removed ? "-" : e.Added ? "+" : e.Grown ? "^" : "=")} {e.Name}  {e.Vanilla?.ToString() ?? "-"} -> {(e.Removed ? "-" : e.Size)}");
+        foreach (string warning in result.Warnings) Console.Error.WriteLine($"warning: {warning}");
 
-    Console.WriteLine($"{result.Modified} of {result.Files} files aren't vanilla {game.Name} {RestblGenerator.VersionName(target)}: "
-                      + $"{result.Entries.Count(e => e.Added)} added, {result.Entries.Count(e => e.Grown)} grown, "
-                      + $"{result.Entries.Count(e => e.Removed)} removed, {result.Entries.Count(e => !e.Added && !e.Grown && !e.Removed)} already big enough.");
-    Console.WriteLine(result.Written is { } written ? $"Wrote {written}"
-        : result.Changed ? "Dry run: nothing written."
-        : "No RESTBL needed: every entry fits the vanilla one.");
-    return 0;
+        Console.WriteLine(Summary(game, result));
+        Console.WriteLine(Outcome(result));
+        return 0;
+    }
+
+    IReadOnlyList<ModResult> results = generator.GenerateAll(mods, version, write: !dryRun);
+    foreach (ModResult r in results)
+    {
+        string name = Path.GetRelativePath(rest[0], r.Mod);
+        if (r.Error is not null) Console.Error.WriteLine($"{name}: failed: {r.Error}");
+        else if (r.Skipped is not null) Console.WriteLine($"{name}: skipped: {r.Skipped}");
+        else
+        {
+            Console.WriteLine($"{name}: {Summary(game, r.Result!)} {Outcome(r.Result!)}");
+            foreach (string warning in r.Result!.Warnings) Console.Error.WriteLine($"{name}: warning: {warning}");
+        }
+    }
+
+    Console.WriteLine($"{results.Count} mods: {results.Count(r => r.Result?.Written is not null)} tables written, "
+                      + $"{results.Count(r => r.Result is { Written: null, Changed: true })} previewed, {results.Count(r => r.Result is { Changed: false })} needed none, "
+                      + $"{results.Count(r => r.Skipped is not null)} skipped, {results.Count(r => r.Error is not null)} failed.");
+    return results.Any(r => r.Error is not null) ? 1 : 0;
 }
 catch (Exception e) when (e is IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException or ArgumentException)
 {
     Console.Error.WriteLine(e.Message);
     return 1;
 }
+
+static string Summary(Game game, RestblResult result)
+    => $"{result.Modified} of {result.Files} files aren't vanilla {game.Name} {RestblGenerator.VersionName(result.Version)}: "
+       + $"{result.Entries.Count(e => e.Added)} added, {result.Entries.Count(e => e.Grown)} grown, "
+       + $"{result.Entries.Count(e => e.Removed)} removed, {result.Entries.Count(e => !e.Added && !e.Grown && !e.Removed)} already big enough.";
+
+static string Outcome(RestblResult result)
+    => result.Written is { } written ? $"Wrote {written}"
+        : result.Changed ? "Dry run: nothing written."
+        : "No RESTBL needed: every entry fits the vanilla one.";
 
 int Import(string? dataRoot)
 {

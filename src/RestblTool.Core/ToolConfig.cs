@@ -6,6 +6,7 @@ public sealed class ToolConfig
 {
     public string? Game { get; set; }
     public string? Mod { get; set; }
+    public string? ModsFolder { get; set; }
     public int? Version { get; set; }
 
     private static string FilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RestblTool", "config.json");

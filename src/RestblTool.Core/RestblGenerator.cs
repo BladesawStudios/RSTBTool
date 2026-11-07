@@ -17,6 +17,8 @@ public sealed record RestblResult(int Version, string Romfs, string? Written, IR
     public bool Changed => Entries.Any(e => e.Added || e.Grown || e.Removed);
 }
 
+public sealed record ModResult(string Mod, RestblResult? Result, string? Skipped, string? Error);
+
 public sealed partial class RestblGenerator
 {
     private readonly Game _game;
@@ -53,6 +55,32 @@ public sealed partial class RestblGenerator
 
     public int DefaultVersion(string romfs)
         => ModVersions(romfs).Where(_versions.Contains).ToArray() is [var only] ? only : Latest;
+
+    public IReadOnlyList<ModResult> GenerateAll(IReadOnlyList<string> mods, int? version, bool write = true, Action<int>? modStarted = null, IProgress<(int Done, int Total)>? progress = null)
+    {
+        List<ModResult> results = [];
+        for (int i = 0; i < mods.Count; i++)
+        {
+            modStarted?.Invoke(i);
+            try
+            {
+                if (mods.Count > 1 && Game.Detect(mods[i]) is { } detected && detected != _game.Id)
+                {
+                    results.Add(new ModResult(mods[i], null, $"This looks like a {Game.All().First(g => g.Id == detected).Name} mod, so it was left alone.", null));
+                    continue;
+                }
+
+                int target = version ?? DefaultVersion(_game.FindRoots(mods[i]).Main);
+                results.Add(new ModResult(mods[i], Generate(mods[i], target, write, progress), null, null));
+            }
+            catch (Exception e)
+            {
+                results.Add(new ModResult(mods[i], null, null, e.Message));
+            }
+        }
+
+        return results;
+    }
 
     public RestblResult Generate(string mod, int version, bool write = true, IProgress<(int Done, int Total)>? progress = null)
     {
@@ -130,7 +158,9 @@ public sealed partial class RestblGenerator
 
     private static IEnumerable<(string Path, string Full)> Enumerate(string root, string prefix)
         => Directory.Exists(root)
-            ? Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories).Select(f => (prefix + Path.GetRelativePath(root, f).Replace('\\', '/'), f))
+            ? Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories)
+                .Where(f => Path.GetFileName(f) is not ("desktop.ini" or "Thumbs.db") && !Path.GetFileName(f).StartsWith('.'))
+                .Select(f => (prefix + Path.GetRelativePath(root, f).Replace('\\', '/'), f))
             : [];
 
     private bool Visit(Scan scan, string key, string path, byte[] raw, bool inDlcPack, int depth)

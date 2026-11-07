@@ -19,6 +19,44 @@ public abstract class Game(string id, string name, string? dataRoot)
 
     public abstract ModRoots FindRoots(string mod);
 
+    public abstract bool IsModRoot(string dir);
+
+    public IReadOnlyList<string> FindMods(string folder)
+    {
+        folder = Path.TrimEndingDirectorySeparator(Path.GetFullPath(folder));
+        if (!Directory.Exists(folder)) throw new DirectoryNotFoundException($"{folder} doesn't exist.");
+
+        List<string> mods = [];
+        Walk(folder, 0);
+        if (mods.Count > 0) return mods;
+        return IsModRoot(folder) ? [folder] : throw new DirectoryNotFoundException($"No {Name} mods in {folder}.");
+
+        void Walk(string dir, int depth)
+        {
+            if (IsModRoot(dir) && HoldsGameFiles(FindRoots(dir)))
+            {
+                mods.Add(dir);
+                return;
+            }
+
+            if (depth == MaxModDepth) return;
+            foreach (string sub in Directory.EnumerateDirectories(dir, "*", ModSearch).Order(StringComparer.OrdinalIgnoreCase))
+                if (!Path.GetFileName(sub).StartsWith('.')) Walk(sub, depth + 1);
+        }
+    }
+
+    private bool HoldsGameFiles(ModRoots roots)
+        => new[] { roots.Main, roots.Dlc }.OfType<string>().Where(Directory.Exists)
+            .SelectMany(root => Directory.EnumerateDirectories(root, "*", ModSearch))
+            .Where(dir => GameFolders.Contains(Path.GetFileName(dir)))
+            .SelectMany(dir => Directory.EnumerateFiles(dir, "*", new EnumerationOptions { IgnoreInaccessible = true, AttributesToSkip = 0, RecurseSubdirectories = true }))
+            .Any(file => !Path.GetFileName(file).Contains("sizetable", StringComparison.OrdinalIgnoreCase) && !Path.GetFileName(file).StartsWith('.'));
+
+    protected abstract HashSet<string> GameFolders { get; }
+
+    private const int MaxModDepth = 3;
+    private static readonly EnumerationOptions ModSearch = new() { IgnoreInaccessible = true, AttributesToSkip = 0 };
+
     public abstract string TableName(int version);
 
     public abstract ResourceSizeTable NewTable();
@@ -100,11 +138,22 @@ public abstract class ZstdGame : Game
             _ => throw new InvalidDataException($"More than one romfs folder in {mod}; pick one."),
         };
     }
+
+    public override bool IsModRoot(string dir)
+        => Path.GetFileName(dir).Equals("romfs", StringComparison.OrdinalIgnoreCase) || Directory.Exists(Path.Combine(dir, "romfs"));
 }
 
 public sealed class Totk(string? dataRoot) : ZstdGame(TotkId, "Tears of the Kingdom", dataRoot)
 {
     public const string TotkId = "totk";
+
+    protected override HashSet<string> GameFolders { get; } = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "AI", "AISchedule", "AS", "ActorSystem", "AnimationEvent", "BSA", "Bake", "Banc", "CameraAnimation", "Cave", "CaveBounding", "Chemical",
+        "Component", "Cooking", "Cull", "ELink2", "Ecosystem", "Effect", "Env", "Event", "Font", "Forest", "Game", "GameBalance", "GameData",
+        "GameParameter", "GrassStats", "Lib", "Life", "Logic", "Mals", "Model", "Movie", "Pack", "Perception", "Phive", "Preload", "PrequelSaveData",
+        "RSDB", "Rumble", "SLink2", "Scene", "Sequence", "Shader", "Sound", "System", "TerrainArc", "TexToGo", "UI", "UMii", "Voice", "VolumeStats", "WorldMgr",
+    };
 
     public override string TableName(int version)
         => version >= 140 ? $"ResourceSizeTable.Product.{version}.Nin_NX_NVN.rsizetable.zs" : $"ResourceSizeTable.Product.{version}.rsizetable.zs";
@@ -119,6 +168,14 @@ public sealed class Oot(string? dataRoot) : ZstdGame(OotId, "Ocarina of Time", d
 {
     public const string OotId = "oot";
 
+    protected override HashSet<string> GameFolders { get; } = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "AI", "AISchedule", "AS", "ActorSystem", "AnimationEvent", "AoC1", "BSA", "Bake", "Banc", "CameraAnimation", "Chemical", "Component", "ELink2",
+        "Effect", "Env", "Event", "Foliage", "Font2", "Game", "GameBalance", "GameData", "GameParameter", "Layout2Shader", "Lib", "Life", "Logic", "Mals",
+        "Model", "Movie", "Pack", "Perception", "Phive", "PreComputedCulling", "RSDB", "Reaction", "Rumble", "SLink2", "Scene", "Sequence", "Shader", "Sound",
+        "System", "TerrainArc", "Tex", "UI", "Voice", "VolumeStats", "WorldMgr", "agl", "gsys",
+    };
+
     public override string TableName(int version) => $"ResourceSizeTable.Product.{version}.Nin_Ounce_NVN2.rsizetable.zs";
 
     public override string CanonicalName(string path) => OotSizeCalculator.CanonicalName(path);
@@ -131,6 +188,12 @@ public sealed class Botw(bool wiiU, string? dataRoot) : Game(wiiU ? WiiUId : Swi
 {
     public const string SwitchId = "botw-switch";
     public const string WiiUId = "botw-wiiu";
+
+    protected override HashSet<string> GameFolders { get; } = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Actor", "Aoc", "Effect", "Event", "Font", "Game", "Layout", "Local", "Map", "Model", "Movie", "NavMesh", "Pack", "Physics", "Sound", "System",
+        "Terrain", "UI", "Voice",
+    };
 
     private const string Dlc = "Aoc/0010/";
     private const string SwitchBase = "01007EF00011E000";
@@ -205,6 +268,9 @@ public sealed class Botw(bool wiiU, string? dataRoot) : Game(wiiU ? WiiUId : Swi
             _ => throw new InvalidDataException($"More than one mod in {mod}; pick one."),
         };
     }
+
+    public override bool IsModRoot(string dir)
+        => Path.GetFileName(dir).Equals(wiiU ? "content" : "romfs", StringComparison.OrdinalIgnoreCase) || Look(dir) is not null;
 
     private ModRoots? Look(string? dir)
     {
