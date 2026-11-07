@@ -3,7 +3,7 @@ using Silk.NET.GLFW;
 using Silk.NET.Windowing;
 using StbImageSharp;
 
-namespace RestblTool.Gui.UI;
+namespace RestblCalculator.Gui.UI;
 
 public static class WindowIcon
 {

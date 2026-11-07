@@ -1,7 +1,7 @@
 using System.Numerics;
 using ImGuiNET;
 
-namespace RestblTool.Gui.UI;
+namespace RestblCalculator.Gui.UI;
 
 public static class Widgets
 {

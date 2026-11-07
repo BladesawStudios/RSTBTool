@@ -3,7 +3,7 @@ using System.Text.Json;
 using RSTBSharp;
 using ZsDicSharp;
 
-namespace RestblTool.Core;
+namespace RestblCalculator.Core;
 
 public static class TableData
 {

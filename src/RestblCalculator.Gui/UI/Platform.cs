@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using ImGuiNET;
 using Silk.NET.Input;
 
-namespace RestblTool.Gui.UI;
+namespace RestblCalculator.Gui.UI;
 
 public static unsafe class Platform
 {

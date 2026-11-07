@@ -1,6 +1,6 @@
 using ImGuiNET;
-using RestblTool.Gui;
-using RestblTool.Gui.UI;
+using RestblCalculator.Gui;
+using RestblCalculator.Gui.UI;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
@@ -10,7 +10,7 @@ using Silk.NET.Windowing;
 WindowOptions options = WindowOptions.Default with
 {
     Size = new Vector2D<int>(1100, 760),
-    Title = "RESTBL Generator",
+    Title = "RESTBL Calculator",
     VSync = true,
 };
 

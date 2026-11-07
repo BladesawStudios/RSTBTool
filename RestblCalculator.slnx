@@ -1,8 +1,8 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/RestblTool.Cli/RestblTool.Cli.csproj" />
-    <Project Path="src/RestblTool.Core/RestblTool.Core.csproj" />
-    <Project Path="src/RestblTool.Gui/RestblTool.Gui.csproj" />
+    <Project Path="src/RestblCalculator.Cli/RestblCalculator.Cli.csproj" />
+    <Project Path="src/RestblCalculator.Core/RestblCalculator.Core.csproj" />
+    <Project Path="src/RestblCalculator.Gui/RestblCalculator.Gui.csproj" />
   </Folder>
   <Folder Name="/lib/">
     <Project Path="lib/RstbSharp/src/RstbSharp/RSTBSharp.csproj" />

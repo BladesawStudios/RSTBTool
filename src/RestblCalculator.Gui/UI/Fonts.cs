@@ -2,7 +2,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using ImGuiNET;
 
-namespace RestblTool.Gui.UI;
+namespace RestblCalculator.Gui.UI;
 
 public static unsafe class Fonts
 {

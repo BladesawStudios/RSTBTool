@@ -1,9 +1,9 @@
 using System.Numerics;
 using ImGuiNET;
-using RestblTool.Core;
-using RestblTool.Gui.UI;
+using RestblCalculator.Core;
+using RestblCalculator.Gui.UI;
 
-namespace RestblTool.Gui;
+namespace RestblCalculator.Gui;
 
 public sealed class App : IDisposable
 {
@@ -91,7 +91,7 @@ public sealed class App : IDisposable
         ImGui.Begin("##main", Widgets.FixedPanel | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
         ImGui.PopStyleVar(2);
 
-        Widgets.DialogTitle("RESTBL Generator");
+        Widgets.DialogTitle("RESTBL Calculator");
 
         bool busy = _run is not null;
         ImGui.BeginDisabled(busy);

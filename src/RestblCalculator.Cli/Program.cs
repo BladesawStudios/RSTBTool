@@ -1,4 +1,4 @@
-using RestblTool.Core;
+using RestblCalculator.Core;
 
 const string Usage = """
     usage: restbl <mod or folder of mods> [--game id] [--version 1.4.3] [--dry-run]

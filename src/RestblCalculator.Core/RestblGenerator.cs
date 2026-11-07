@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 using RSTBSharp;
 using SarcSharp;
 
-namespace RestblTool.Core;
+namespace RestblCalculator.Core;
 
 public sealed record RestblEntry(string Name, uint? Vanilla, uint Calculated, uint Size)
 {

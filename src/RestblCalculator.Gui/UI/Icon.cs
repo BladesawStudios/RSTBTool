@@ -1,4 +1,4 @@
-namespace RestblTool.Gui.UI;
+namespace RestblCalculator.Gui.UI;
 
 public static class Icon
 {

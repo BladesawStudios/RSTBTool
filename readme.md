@@ -1,4 +1,4 @@
-# RESTBL Generator
+# RESTBL Calculator
 
 Builds the resource size table a mod needs for *Tears of the Kingdom*, *Ocarina of Time* (Switch 2) or *Breath of the Wild*
 (Switch and Wii U).
@@ -8,7 +8,7 @@ Builds the resource size table a mod needs for *Tears of the Kingdom*, *Ocarina 
 
 ```bash
 git submodule update --init --recursive
-dotnet build RestblTool.slnx -c Release
+dotnet build RestblCalculator.slnx -c Release
 ```
 
 ## Licence

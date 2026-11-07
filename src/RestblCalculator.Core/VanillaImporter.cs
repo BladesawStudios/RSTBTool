@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using RSTBSharp;
 using SarcSharp;
 
-namespace RestblTool.Core;
+namespace RestblCalculator.Core;
 
 public static class VanillaImporter
 {

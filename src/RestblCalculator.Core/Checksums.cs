@@ -2,7 +2,7 @@ using System.Buffers.Binary;
 using System.IO.Hashing;
 using System.Text;
 
-namespace RestblTool.Core;
+namespace RestblCalculator.Core;
 
 public static class Checksums
 {

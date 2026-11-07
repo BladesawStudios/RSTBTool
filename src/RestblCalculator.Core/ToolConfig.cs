@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace RestblTool.Core;
+namespace RestblCalculator.Core;
 
 public sealed class ToolConfig
 {
@@ -9,7 +9,7 @@ public sealed class ToolConfig
     public string? ModsFolder { get; set; }
     public int? Version { get; set; }
 
-    private static string FilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "RestblTool", "config.json");
+    private static string FilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "RestblCalculator", "config.json");
 
     public static ToolConfig Load()
     {

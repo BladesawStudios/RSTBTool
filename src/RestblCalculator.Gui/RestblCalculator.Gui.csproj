@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <AssemblyName>RestblTool</AssemblyName>
+    <AssemblyName>RestblCalculator</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <UseCurrentRuntimeIdentifier>true</UseCurrentRuntimeIdentifier>
     <SelfContained>false</SelfContained>
@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RestblTool.Core\RestblTool.Core.csproj" />
+    <ProjectReference Include="..\RestblCalculator.Core\RestblCalculator.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

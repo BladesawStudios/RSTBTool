@@ -2,7 +2,7 @@ using RSTBSharp;
 using Yaz0Sharp;
 using ZsDicSharp;
 
-namespace RestblTool.Core;
+namespace RestblCalculator.Core;
 
 public sealed record ModRoots(string Main, string? Dlc);
 

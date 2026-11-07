@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using NativeFileDialogSharp;
 
-namespace RestblTool.Gui.UI;
+namespace RestblCalculator.Gui.UI;
 
 public static class NativeDialogs
 {
