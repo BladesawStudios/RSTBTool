@@ -7,6 +7,7 @@
     <UseCurrentRuntimeIdentifier>true</UseCurrentRuntimeIdentifier>
     <SelfContained>false</SelfContained>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <ApplicationIcon>Icons\icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,9 +19,11 @@
     <PackageReference Include="Silk.NET.Input" Version="2.23.0" />
     <PackageReference Include="Silk.NET.OpenGL.Extensions.ImGui" Version="2.23.0" />
     <PackageReference Include="NativeFileDialogSharp" Version="0.5.0" />
+    <PackageReference Include="StbImageSharp" Version="2.30.15" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Icons\icon.png" LogicalName="icon.png" />
     <None Update="Fonts\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

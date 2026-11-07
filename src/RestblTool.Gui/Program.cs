@@ -22,6 +22,7 @@ App? app = null;
 
 window.Load += () =>
 {
+    WindowIcon.Apply(window);
     gl = window.CreateOpenGL();
     input = window.CreateInput();
     controller = new ImGuiController(gl, window, input, null, () =>
