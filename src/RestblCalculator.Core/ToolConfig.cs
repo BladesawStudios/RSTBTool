@@ -8,6 +8,7 @@ public sealed class ToolConfig
     public string? Mod { get; set; }
     public string? ModsFolder { get; set; }
     public int? Version { get; set; }
+    public float? UiScale { get; set; }
 
     private static string FilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "RestblCalculator", "config.json");
 

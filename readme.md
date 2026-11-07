@@ -11,6 +11,8 @@ git submodule update --init --recursive
 dotnet build RestblCalculator.slnx -c Release
 ```
 
+`dotnet run publish.cs` packages Windows, Linux and Mac builds into `publish/`.
+
 ## Licence
 
 AGPL-3.0-or-later. See [license.md](license.md).

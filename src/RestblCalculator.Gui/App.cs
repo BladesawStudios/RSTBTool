@@ -7,6 +7,11 @@ namespace RestblCalculator.Gui;
 
 public sealed class App : IDisposable
 {
+    private static readonly (string Label, float? Scale)[] UiSizes =
+    [
+        ("Auto", null), ("100%", 1f), ("125%", 1.25f), ("150%", 1.5f), ("175%", 1.75f), ("200%", 2f), ("250%", 2.5f),
+    ];
+
     private readonly ToolConfig _config = ToolConfig.Load();
     private string _mod;
     private string _folder;
@@ -59,6 +64,8 @@ public sealed class App : IDisposable
         Drop(args);
     }
 
+    public float? UiScale => _config.UiScale;
+
     public void Drop(string[] paths)
     {
         foreach (string path in paths.Where(Directory.Exists))
@@ -84,26 +91,29 @@ public sealed class App : IDisposable
         CheckMods();
         CollectRun();
 
+        UiSizeShortcuts();
+
         ImGui.SetNextWindowPos(Vector2.Zero);
         ImGui.SetNextWindowSize(ImGui.GetMainViewport().Size);
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(Theme.Px(18), Theme.Px(16)));
         ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0f);
-        ImGui.Begin("##main", Widgets.FixedPanel | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+        ImGui.Begin("##main", Widgets.FixedPanel);
         ImGui.PopStyleVar(2);
 
+        UiSizeControl();
         Widgets.DialogTitle("RESTBL Calculator");
 
         bool busy = _run is not null;
         ImGui.BeginDisabled(busy);
         (string modNote, Vector4 modColour) = _modError is not null ? (_modError, Theme.Error)
             : _modList.Length == 1 ? ($"Writes to {_modWrites}", Theme.TextMuted)
-            : ("Gets one table, written into the mod.", Theme.TextFaint);
+            : ("", Theme.TextFaint);
         if (PathRow("Mod", "##mod", ref _mod, "A mod folder, or its romfs", modNote, modColour))
             Pick(_mod, p => _mod = p);
 
         (string folderNote, Vector4 folderColour) = _folderError is not null ? (_folderError, Theme.Error)
             : _folderList.Length > 0 ? ($"Found {_folderList.Length} {(_folderList.Length == 1 ? "mod" : "mods")}. Each gets its own table, in its own System/Resource folder.", Theme.TextMuted)
-            : ("Every mod inside gets its own table.", Theme.TextFaint);
+            : ("", Theme.TextFaint);
         if (PathRow("Folder of mods", "##folder", ref _folder, "A folder with mods in it", folderNote, folderColour))
             Pick(_folder, p => _folder = p);
 
@@ -116,6 +126,50 @@ public sealed class App : IDisposable
         Results();
 
         ImGui.End();
+    }
+
+    private void UiSizeControl()
+    {
+        const string label = "UI size";
+        Vector2 after = ImGui.GetCursorPos();
+        float width = Theme.Px(84);
+        ImGui.SetCursorPos(new Vector2(ImGui.GetWindowContentRegionMax().X - width - ImGui.CalcTextSize(label).X - ImGui.GetStyle().ItemSpacing.X, after.Y));
+        ImGui.AlignTextToFramePadding();
+        Widgets.Muted(label);
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(width);
+        int current = Array.FindIndex(UiSizes, s => s.Scale == _config.UiScale);
+        int picked = Widgets.Combo("##uisize", current, UiSizes.Select(s => s.Label).ToArray());
+        Widgets.Tip("How big the interface is. Auto follows your display. Ctrl + and Ctrl - also change it, and Ctrl 0 goes back to Auto.");
+        if (picked != current) SetUiSize(UiSizes[picked].Scale);
+        ImGui.SetCursorPos(after);
+    }
+
+    private void UiSizeShortcuts()
+    {
+        if (!ImGui.GetIO().KeyCtrl) return;
+
+        float[] steps = UiSizes.Select(s => s.Scale).OfType<float>().ToArray();
+        if (ImGui.IsKeyPressed(ImGuiKey.Equal, false) || ImGui.IsKeyPressed(ImGuiKey.KeypadAdd, false))
+        {
+            float next = steps.FirstOrDefault(s => s > Theme.Scale + 0.01f);
+            if (next > 0) SetUiSize(next);
+        }
+        else if (ImGui.IsKeyPressed(ImGuiKey.Minus, false) || ImGui.IsKeyPressed(ImGuiKey.KeypadSubtract, false))
+        {
+            float next = steps.LastOrDefault(s => s < Theme.Scale - 0.01f);
+            if (next > 0) SetUiSize(next);
+        }
+        else if (ImGui.IsKeyPressed(ImGuiKey._0, false) || ImGui.IsKeyPressed(ImGuiKey.Keypad0, false))
+        {
+            SetUiSize(null);
+        }
+    }
+
+    private void SetUiSize(float? scale)
+    {
+        _config.UiScale = scale;
+        _config.Save();
     }
 
     private static bool PathRow(string label, string id, ref string value, string hint, string note, Vector4 noteColour)
@@ -363,7 +417,7 @@ public sealed class App : IDisposable
     {
         const ImGuiTableFlags flags = ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY | ImGuiTableFlags.BordersOuter
                                       | ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingFixedFit;
-        if (!ImGui.BeginTable("##entries", 4, flags, new Vector2(0, ImGui.GetContentRegionAvail().Y))) return;
+        if (!ImGui.BeginTable("##entries", 4, flags, new Vector2(0, MathF.Max(ImGui.GetContentRegionAvail().Y, Theme.Px(200))))) return;
 
         float number = ImGui.CalcTextSize("000,000,000").X + Theme.Px(8);
         ImGui.TableSetupScrollFreeze(0, 1);

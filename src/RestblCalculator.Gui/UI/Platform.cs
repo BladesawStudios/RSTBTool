@@ -13,12 +13,15 @@ public static unsafe class Platform
     public static void Hook(IKeyboard keyboard)
     {
         _keyboard = keyboard;
+        keyboard.KeyDown += (k, _, _) => Modifiers(k);
+        keyboard.KeyUp += (k, _, _) => Modifiers(k);
+    }
+
+    public static void Attach()
+    {
         ImGuiIOPtr io = ImGui.GetIO();
         io.GetClipboardTextFn = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, IntPtr>)&GetClipboard;
         io.SetClipboardTextFn = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, IntPtr, void>)&SetClipboard;
-
-        keyboard.KeyDown += (k, _, _) => Modifiers(k);
-        keyboard.KeyUp += (k, _, _) => Modifiers(k);
     }
 
     private static void Modifiers(IKeyboard k)

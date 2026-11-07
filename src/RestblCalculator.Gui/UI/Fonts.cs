@@ -43,6 +43,9 @@ public static unsafe class Fonts
             return;
         }
 
+        if (_textRanges.IsAllocated) _textRanges.Free();
+        if (_iconRanges.IsAllocated) _iconRanges.Free();
+
         _textRanges = GCHandle.Alloc(new ushort[]
         {
             0x0020, 0x017F, 0x0400, 0x04FF, 0x2010, 0x2027, 0x2190, 0x2193, 0x2212, 0x2212, 0x2248, 0x2248, 0,
