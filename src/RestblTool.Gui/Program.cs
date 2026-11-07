@@ -50,9 +50,12 @@ window.Render += delta =>
     controller.Render();
 };
 
-window.Run();
+window.Closing += () =>
+{
+    app?.Dispose();
+    controller?.Dispose();
+    input?.Dispose();
+    gl?.Dispose();
+};
 
-app?.Dispose();
-controller?.Dispose();
-input?.Dispose();
-gl?.Dispose();
+window.Run();

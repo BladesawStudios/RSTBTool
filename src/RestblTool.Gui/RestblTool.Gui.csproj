@@ -4,6 +4,9 @@
     <OutputType>WinExe</OutputType>
     <AssemblyName>RestblTool</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UseCurrentRuntimeIdentifier>true</UseCurrentRuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +18,10 @@
     <PackageReference Include="Silk.NET.Input" Version="2.23.0" />
     <PackageReference Include="Silk.NET.OpenGL.Extensions.ImGui" Version="2.23.0" />
     <PackageReference Include="NativeFileDialogSharp" Version="0.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Fonts\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

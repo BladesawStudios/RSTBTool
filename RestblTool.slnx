@@ -5,7 +5,7 @@
     <Project Path="src/RestblTool.Gui/RestblTool.Gui.csproj" />
   </Folder>
   <Folder Name="/lib/">
-    <Project Path="lib/RstbSharp/src/RstbSharp/RstbSharp.csproj" />
+    <Project Path="lib/RstbSharp/src/RstbSharp/RSTBSharp.csproj" />
     <Project Path="lib/SarcSharp/src/SarcSharp/SarcSharp.csproj" />
     <Project Path="lib/Yaz0Sharp/src/Yaz0Sharp/Yaz0Sharp.csproj" />
     <Project Path="lib/ZsDicSharp/src/ZsDicSharp/ZsDicSharp.csproj" />

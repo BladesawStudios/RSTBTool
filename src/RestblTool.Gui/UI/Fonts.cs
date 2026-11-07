@@ -20,15 +20,21 @@ public static unsafe class Fonts
     private static GCHandle _textRanges;
     private static GCHandle _iconRanges;
 
+    private static readonly string WindowsDir = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
+
+    public static readonly bool WindowsFaces = OperatingSystem.IsWindows()
+        && Existing(WindowsDir, "tahoma.ttf", "segoeui.ttf") is not null
+        && Existing(WindowsDir, "SegoeIcons.ttf", "segmdl2.ttf") is not null;
+
     public static void Load(float scale)
     {
         ImFontAtlasPtr atlas = ImGui.GetIO().Fonts;
-        string dir = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
+        string dir = WindowsFaces ? WindowsDir : Path.Combine(AppContext.BaseDirectory, "Fonts");
 
-        string? regular = Existing(dir, "tahoma.ttf", "segoeui.ttf");
-        string? bold = Existing(dir, "tahomabd.ttf", "seguisb.ttf") ?? regular;
-        string? mono = Existing(dir, "CascadiaMono.ttf", "consola.ttf") ?? regular;
-        string? icons = Existing(dir, "SegoeIcons.ttf", "segmdl2.ttf");
+        string? regular = Existing(dir, "tahoma.ttf", "segoeui.ttf", "DejaVuSans.ttf");
+        string? bold = Existing(dir, "tahomabd.ttf", "seguisb.ttf", "DejaVuSans-Bold.ttf") ?? regular;
+        string? mono = Existing(dir, "CascadiaMono.ttf", "consola.ttf", "DejaVuSansMono.ttf") ?? regular;
+        string? icons = Existing(dir, "SegoeIcons.ttf", "segmdl2.ttf", "fa-solid-900.ttf");
         string? japanese = Existing(dir, "YuGothM.ttc", "meiryo.ttc", "msgothic.ttc");
 
         if (regular is null)

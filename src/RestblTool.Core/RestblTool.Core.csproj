@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="$(LibRoot)\RstbSharp\src\RstbSharp\RstbSharp.csproj" />
+    <ProjectReference Include="$(LibRoot)\RstbSharp\src\RstbSharp\RSTBSharp.csproj" />
     <ProjectReference Include="$(LibRoot)\SarcSharp\src\SarcSharp\SarcSharp.csproj" />
     <ProjectReference Include="$(LibRoot)\Yaz0Sharp\src\Yaz0Sharp\Yaz0Sharp.csproj" />
     <ProjectReference Include="$(LibRoot)\ZsDicSharp\src\ZsDicSharp\ZsDicSharp.csproj" />

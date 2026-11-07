@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Numerics;
 using ImGuiNET;
 using RestblTool.Core;
@@ -323,7 +322,7 @@ public sealed class App : IDisposable
         if (r.Written is { } written)
         {
             Widgets.Banner(Icon.Check, $"Wrote {Path.GetRelativePath(Path.GetDirectoryName(r.Romfs)!, written)}. {counts}", Theme.Good);
-            if (ImGui.Button("Show in Explorer")) Process.Start("explorer.exe", $"/select,\"{written}\"");
+            if (ImGui.Button(OperatingSystem.IsWindows() ? "Show in Explorer" : "Show in folder")) Reveal(written);
             ImGui.Dummy(new Vector2(0, Theme.Px(2)));
         }
         else if (!r.Changed)
@@ -565,7 +564,20 @@ public sealed class App : IDisposable
         if (_picking is not { IsCompleted: true } picking) return;
         _picking = null;
         if (picking.IsCompletedSuccessfully && picking.Result is { } path) _picked?.Invoke(path);
+        else if (picking.IsFaulted) _error = $"Browse isn't available on this system, so paste the path instead. {picking.Exception!.InnerException!.Message}";
         _picked = null;
+    }
+
+    private void Reveal(string file)
+    {
+        try
+        {
+            NativeDialogs.Reveal(file);
+        }
+        catch (Exception e) when (e is System.ComponentModel.Win32Exception or InvalidOperationException)
+        {
+            _error = $"Couldn't open the folder: {e.Message}";
+        }
     }
 
     public void Dispose()

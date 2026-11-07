@@ -159,14 +159,14 @@ public sealed partial class RestblGenerator
     private static IEnumerable<(string Path, string Full)> Enumerate(string root, string prefix)
         => Directory.Exists(root)
             ? Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories)
-                .Where(f => Path.GetFileName(f) is not ("desktop.ini" or "Thumbs.db") && !Path.GetFileName(f).StartsWith('.'))
+                .Where(f => Path.GetFileName(f) is not ("desktop.ini" or "Thumbs.db" or "rules.txt") && !Path.GetFileName(f).StartsWith('.'))
                 .Select(f => (prefix + Path.GetRelativePath(root, f).Replace('\\', '/'), f))
             : [];
 
     private bool Visit(Scan scan, string key, string path, byte[] raw, bool inDlcPack, int depth)
     {
         string canonical = _game.CanonicalName(path);
-        if (canonical.EndsWith(".rsizetable", StringComparison.Ordinal)) return false;
+        if (canonical.EndsWith(".rsizetable", StringComparison.Ordinal) || Path.GetFileName(path).StartsWith("ResourceSizeTable.", StringComparison.OrdinalIgnoreCase)) return false;
 
         byte[] plain = _game.Decompress(raw, path);
         if (Checksums.Find(_checksums, key, scan.Version, _versions) == Checksums.Hash(plain)) return false;

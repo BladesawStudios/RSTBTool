@@ -9,7 +9,7 @@ public sealed class ToolConfig
     public string? ModsFolder { get; set; }
     public int? Version { get; set; }
 
-    private static string FilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RestblTool", "config.json");
+    private static string FilePath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "RestblTool", "config.json");
 
     public static ToolConfig Load()
     {
@@ -17,7 +17,7 @@ public sealed class ToolConfig
         {
             return File.Exists(FilePath) ? JsonSerializer.Deserialize<ToolConfig>(File.ReadAllText(FilePath)) ?? new() : new();
         }
-        catch (JsonException)
+        catch (Exception e) when (e is JsonException or IOException or UnauthorizedAccessException)
         {
             return new();
         }
@@ -25,7 +25,13 @@ public sealed class ToolConfig
 
     public void Save()
     {
-        Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
-        File.WriteAllText(FilePath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
+            File.WriteAllText(FilePath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+        }
     }
 }
